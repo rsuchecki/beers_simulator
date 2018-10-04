@@ -1,1 +1,5 @@
-test/
+simulator_config_*
+*_temp
+simulated_reads*
+*.log
+fraglenhisto_
