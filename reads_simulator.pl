@@ -729,7 +729,7 @@ for($i=0; $i<$numgenes; $i++) {
     # $i is the original gene id
     # gene $genecnt is the same gene as $i but will be modified to be an alternate splice form
     $geneid = $genes[$i];
-    print STDERR "gene id is" . $geneid . "\n";
+    print STDERR "gene id is " . $geneid . "\n";
     @a = @{$gene2exon{$geneid}};
     $exoncnt = @a;
     $original_gene_count = $gene_count[$i];
@@ -739,7 +739,7 @@ for($i=0; $i<$numgenes; $i++) {
     $genes2[$i] = $geneid;
     for($j=0; $j<$num_alt_splice_forms_per_gene; $j++) {
 	$geneid_x = $geneid . "_$j";
-  print STDERR "alternate gene id is" . $geneid_x . "\n";
+  print STDERR "alternate gene id is " . $geneid_x . "\n";
 	$genes2[$genecnt+$j*$numgenes] = $geneid_x;
 	$gene_count[$genecnt+$j*$numgenes] = $original_gene_count * $percent_alt_spliceforms/$num_alt_splice_forms_per_gene;
 	$exoncnt_x = 0;
@@ -757,6 +757,9 @@ for($i=0; $i<$numgenes; $i++) {
 	while($FLAG1 == 0 || $FLAG2 == 0) {
       $run++;
       print STDERR "run number " . $run . "\n";
+      if($run == 100) {
+        print "long run of gene id " . $geneid_x . "\n";
+      }
 	    $FLAG1 = 0;
 	    $FLAG2 = 0;
 	    $starts_new = "";
@@ -787,7 +790,7 @@ for($i=0; $i<$numgenes; $i++) {
 		      $FLAG2 = 1;
 	    }
 	}
-  
+
 	$starts{$geneid_x} = $starts_new;
 	$ends{$geneid_x} = $ends_new;
 	$strand{$geneid_x} = $strand{$geneid};
