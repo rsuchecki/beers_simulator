@@ -98,13 +98,13 @@ BEGIN {
     eval {
         require Math::Random;
 
-        # If you'd ordinarily "use Module::Name qw(foo bar baz);", pass                                          
-        # the qw(foo bar baz) to import here.                                                                    
+        # If you'd ordinarily "use Module::Name qw(foo bar baz);", pass
+        # the qw(foo bar baz) to import here.
 
         import Math::Random qw(:all);
     };
 
-    # If the eval failed, we don't have the module                                                               
+    # If the eval failed, we don't have the module
     if ($@) {
         print STDERR "\nOops, you must first install the Math::Random module for this to work...\n\n";
         exit(0);
@@ -729,6 +729,7 @@ for($i=0; $i<$numgenes; $i++) {
     # $i is the original gene id
     # gene $genecnt is the same gene as $i but will be modified to be an alternate splice form
     $geneid = $genes[$i];
+    print STDERR "gene id is" . $geneid . "\n";
     @a = @{$gene2exon{$geneid}};
     $exoncnt = @a;
     $original_gene_count = $gene_count[$i];
@@ -738,6 +739,7 @@ for($i=0; $i<$numgenes; $i++) {
     $genes2[$i] = $geneid;
     for($j=0; $j<$num_alt_splice_forms_per_gene; $j++) {
 	$geneid_x = $geneid . "_$j";
+  print STDERR "alternate gene id is" . $geneid_x . "\n";
 	$genes2[$genecnt+$j*$numgenes] = $geneid_x;
 	$gene_count[$genecnt+$j*$numgenes] = $original_gene_count * $percent_alt_spliceforms/$num_alt_splice_forms_per_gene;
 	$exoncnt_x = 0;
@@ -751,7 +753,10 @@ for($i=0; $i<$numgenes; $i++) {
 	@E = split(/,/,$str);
 	$FLAG1 = 0;
 	$FLAG2 = 0;
+  $run = 0;
 	while($FLAG1 == 0 || $FLAG2 == 0) {
+      $run++;
+      print STDERR "run number " . $run . "\n";
 	    $FLAG1 = 0;
 	    $FLAG2 = 0;
 	    $starts_new = "";
@@ -760,28 +765,29 @@ for($i=0; $i<$numgenes; $i++) {
 	    delete($gene2exon{$geneid_x});
 
 	    for($k=0; $k<$exoncnt; $k++) {
-		$flip = int(rand(2));
-		if($flip == 1) {
-		    if($strand{$geneid} eq "+") {
-			$starts_new = $starts_new . "$S[$k],";
-			$ends_new = $ends_new . "$E[$k],";
-		    }
-		    if($strand{$geneid} eq "-") {
-			$starts_new = "$S[$numexons-$k-1]," . $starts_new;
-			$ends_new = "$E[$numexons-$k-1]," . $ends_new;
-		    }
-		    $gene2exon{$geneid_x}[$exoncnt_x] = $gene2exon{$geneid}[$k];
-		    $exoncnt_x++;
-		    $FLAG1 = 1; # This makes sure we kept at least one exon
-		}
-		else {
-		    $FLAG2 = 1; # This makes sure we skipped at least one exon
-		}
+      		$flip = int(rand(2));
+      		if($flip == 1) {
+      		    if($strand{$geneid} eq "+") {
+            			$starts_new = $starts_new . "$S[$k],";
+            			$ends_new = $ends_new . "$E[$k],";
+      		    }
+      		    if($strand{$geneid} eq "-") {
+            			$starts_new = "$S[$numexons-$k-1]," . $starts_new;
+            			$ends_new = "$E[$numexons-$k-1]," . $ends_new;
+      		    }
+      		    $gene2exon{$geneid_x}[$exoncnt_x] = $gene2exon{$geneid}[$k];
+      		    $exoncnt_x++;
+      		    $FLAG1 = 1; # This makes sure we kept at least one exon
+      		}	else {
+      		    $FLAG2 = 1; # This makes sure we skipped at least one exon
+      		}
 	    }
+
 	    if($exoncnt == 1) {
-		$FLAG2 = 1;
+		      $FLAG2 = 1;
 	    }
 	}
+  
 	$starts{$geneid_x} = $starts_new;
 	$ends{$geneid_x} = $ends_new;
 	$strand{$geneid_x} = $strand{$geneid};
@@ -1052,14 +1058,14 @@ if($useindels eq "true") {  # user wants to read indels from a file
 	    $l = -1 * $indellength;
 	    $Z = substr($SEQ,$LOC,$l,"");
 	    print SIMINDELSOUT "$exon\t$LOC\t$indellength\t$Z\n";
-	    $exonseq{$exon} = $SEQ;		    
+	    $exonseq{$exon} = $SEQ;
 	}
 
     }
     close(INDELSINFILE);
 }
 
-if($usesubs eq "false" && $useindels eq "false") {  # user wants de novo substitutions and indels, 
+if($usesubs eq "false" && $useindels eq "false") {  # user wants de novo substitutions and indels,
                                                       # as opposed to being read from files
     foreach $exon (keys %exon2gene) {
 	$try_cnt = 0;
@@ -1089,18 +1095,18 @@ if($usesubs eq "false" && $useindels eq "false") {  # user wants de novo substit
 	    $C = $start + $LOC - 1;
 	    print SIMSUBSOUT "$exon\t$C\t$Z->$B\n";
 	}
-	
+
 	$num_indels = random_binomial(1, $length, $indelfrequency);
 	$flag = 0;
-	
+
 	while($flag == 0) {  # the following gets the indel locations and makes sure
 	    # indels are at least two bases apart and are in different
 	    # places from the substitutions
 	    $flag = 1;
 	    undef %indels_locs_temp;
 	    undef %indels_locs;
-	    
-	    
+
+
 	    # first have to choose the indel locations:
 	    for($i=0; $i<$num_indels; $i++) {
 		$LOC = int(rand($length)+1);
@@ -1120,8 +1126,8 @@ if($usesubs eq "false" && $useindels eq "false") {  # user wants de novo substit
 		    if($X < 2 && $X > -2 && $X != 0) {
 			$flag = 0;
 		    }
-		}	    
-	    }	
+		}
+	    }
 	    $indelcounter=0;
 	    # second have to choose the indel lengths:
 	    foreach $LOC (sort {$b<=>$a} keys %indels_locs) {
@@ -1154,7 +1160,7 @@ if($usesubs eq "false" && $useindels eq "false") {  # user wants de novo substit
 			}
 			if($LOC + $indellength >= $length) {
 			    $flag = 0;
-			}		    
+			}
 		    }
 		    $indels_temp[$indelcounter][0] = $LOC;
 		    $indels_temp[$indelcounter][1] = -1 * $indellength;
@@ -1189,7 +1195,7 @@ if($usesubs eq "false" && $useindels eq "false") {  # user wants de novo substit
 		    $num_indels = int($num_indels/2);
 		    $try_cnt=0;
 		}
-	    }	
+	    }
 	}
     }
 }
@@ -1494,7 +1500,7 @@ while( 1 == 1) {
 	    print SIMCIGOUT "$cigstr2$S1_temp\n";
 	}
 	print SIMBEDOUT $bed;
-	
+
 	$CNT++;
 	$CNT2++;
 	if($CNT2 % 50000 == 0) {
@@ -1515,7 +1521,7 @@ while( 1 == 1) {
 		print FGLOUT "$key\t$FLhash{$key}\n";
 	    }
 	    close(FGLOUT);
-	    
+
 	    exit(0);
 	}
     }
@@ -1558,14 +1564,14 @@ sub getreads () {
 	$AFlag = 1;
 
 	undef @FRAGvect;
-    
+
 	for(my $i=1; $i<=$seqlength; $i++) {
 	    $FRAGvect[$i] = 0;
 	}
 	$FRAGvect[0] = 1;
 	$FRAGvect[$seqlength+1] = 1;
 	$flag = 0;
-	
+
 	$numfrags = int($seqlength / $medfraglength);
 	if($numfrags <= 2) {
 	    $numfrags = 3;
@@ -1581,7 +1587,7 @@ sub getreads () {
 	$cnt=0;
 	$cnt2=0;
 	$skipfirstflag = 0;
-	
+
 	undef @fraglen;
 	undef @fragend;
 	for(my $i=1; $i<=$seqlength; $i++) {  # this should skip first and last frags
@@ -1597,7 +1603,7 @@ sub getreads () {
 		$cnt = 0;
 	    }
 	}
-	
+
 	$numfrags = @fraglen;
 	if($numfrags == 0) {
 	    $AFlag = 0;
@@ -1767,7 +1773,7 @@ sub getreads () {
 		    } else {
 			$intronlen = $SEG[0] - $prev_end - 1;
 			$cigar_string = $cigar_string . $intronlen . "N" . $len_seg . "M";
-		    }	
+		    }
 		    $prev_end = $SEG[1];
 		}
 		$cigar_string = $cigar_string . $deletion_length . "D";
@@ -1792,7 +1798,7 @@ sub getreads () {
 	} else {
 	    $intronlen = $SEG[0] - $prev_end - 1;
 	    $cigar_string = $cigar_string . $intronlen . "N" . $len_seg . "M";
-	}	
+	}
 	$prev_end = $SEG[1];
     }
     $coords = $coords . ", " . $coords_to_add;
@@ -1805,7 +1811,7 @@ sub getreads () {
     $cigar_string2 = "";
     $matchcount=0;  # this will keep a running total number of bases of the read accounted for by matches or insertions
     $cigar_string_temp = $cigar_string;
-    $match_total_length = 0;    
+    $match_total_length = 0;
     while($cigar_string_temp =~ /^(\d+)([^\d])/) {
 	$num = $1;
 	$type = $2;
@@ -1931,7 +1937,7 @@ sub getreads () {
 		    } else {
 			$intronlen = $SEG[0] - $prev_end - 1;
 			$cigar_string = $cigar_string . $intronlen . "N" . $len_seg . "M";
-		    }	
+		    }
 		    $prev_end = $SEG[1];
 		}
 		$cigar_string = $cigar_string . $deletion_length . "D";
@@ -1943,7 +1949,7 @@ sub getreads () {
 	    $end_reverse = $end_reverse - $INDELS[$ind][1];
 	}
     }
-    
+
     $fragment_start = $start_reverse + $offset;
     $fragment_length = $end_reverse - $fragment_start + 1;
     $SEQNAME = "seq." . $CNT . "b";
@@ -1957,7 +1963,7 @@ sub getreads () {
 	} else {
 	    $intronlen = $SEG[0] - $prev_end - 1;
 	    $cigar_string = $cigar_string . $intronlen . "N" . $len_seg . "M";
-	}	
+	}
 	$prev_end = $SEG[1];
     }
     $coords = $coords . ", " . $coords_to_add;
@@ -1985,9 +1991,9 @@ sub getreads () {
     $cigar_string2 = "";
     $matchcount=0;  # this will keep a running total number of bases of the read accounted for by matches or insertions
     $cigar_string_temp = $cigar_string;
-    $match_total_length = 0;    
+    $match_total_length = 0;
     $cigar_string_temp = $cigar_string;
-    $match_total_length = 0;    
+    $match_total_length = 0;
     while($cigar_string_temp =~ /^(\d+)([^\d])/) {
 	$num = $1;
 	$type = $2;
@@ -2394,7 +2400,7 @@ sub add_sequencing_error () {
 	    }
         }
     }
-    
+
     $return_vector[0] = $read;
     $return_vector[1] = $Qstring;
 
